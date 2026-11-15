@@ -11,6 +11,7 @@ from PyQt6.QtCore import Qt, QUrl
 from PyQt6.QtMultimedia import QMediaPlayer, QAudioOutput
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
+from modules.audio_mfcc import analyze_audio_mfcc
 
 
 def resource_path(relative_path):
@@ -203,7 +204,9 @@ class FeatureExtractionApp(QMainWindow):
         layout.addWidget(scroll)
         return tab
 
-    # TAB 2: DATA AUDIO (MFCC)
+    # ---------------------------------------------------------
+    # TAB 2: DATA AUDIO (MFCC) - TANPA WAVEFORM
+    # ---------------------------------------------------------
     def build_audio_tab(self):
         tab = QWidget()
         layout = QHBoxLayout(tab)
@@ -265,7 +268,7 @@ class FeatureExtractionApp(QMainWindow):
         left_layout.addWidget(self.lbl_audio_status)
         left_layout.addStretch()
 
-        # Panel Kanan: Grafik Waveform & MFCC
+        # Panel Kanan: Grafik MFCC & Tabel Statistik
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
         scroll.setFrameShape(QFrame.Shape.NoFrame)
@@ -276,24 +279,16 @@ class FeatureExtractionApp(QMainWindow):
         right_layout.setContentsMargins(20, 20, 20, 20)
         right_layout.setSpacing(12)
 
-        sec1 = QLabel("Visualisasi Preprocessing (Waveform Sebelum vs Sesudah Trimming)")
-        sec1.setObjectName("SectionTitle")
-        right_layout.addWidget(sec1)
+        sec_mfcc = QLabel("Visualisasi Ekstraksi Fitur (MFCC Heatmap & Statistik 13 Koefisien)")
+        sec_mfcc.setObjectName("SectionTitle")
+        right_layout.addWidget(sec_mfcc)
 
-        self.canvas_waveform = MplCanvas(width=7, height=3.0)
-        self.canvas_waveform.setMinimumHeight(250)
-        right_layout.addWidget(self.canvas_waveform)
-
-        sec2 = QLabel("Visualisasi Ekstraksi Fitur (MFCC Heatmap & Statistik 13 Koefisien)")
-        sec2.setObjectName("SectionTitle")
-        right_layout.addWidget(sec2)
-
-        self.canvas_mfcc = MplCanvas(width=7, height=3.2)
-        self.canvas_mfcc.setMinimumHeight(260)
+        self.canvas_mfcc = MplCanvas(width=7, height=3.8)
+        self.canvas_mfcc.setMinimumHeight(320)
         right_layout.addWidget(self.canvas_mfcc)
 
         self.table_mfcc = QTableWidget()
-        self.table_mfcc.setMinimumHeight(200)
+        self.table_mfcc.setMinimumHeight(240)
         self.table_mfcc.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
         right_layout.addWidget(self.table_mfcc)
 
@@ -303,7 +298,7 @@ class FeatureExtractionApp(QMainWindow):
         layout.addWidget(scroll)
         return tab
 
-    # FUNGSI PEMBANTU UI & EVENT HANDLER SEMENTARA
+    # FUNGSI PEMBANTU UI & EVENT HANDLER
     def create_readonly_box(self, label_text, max_height):
         lbl = QLabel(label_text)
         lbl.setObjectName("FieldLabel")
@@ -333,11 +328,13 @@ class FeatureExtractionApp(QMainWindow):
 
     def on_select_local_wav(self, filename):
         if filename:
+            self.player.stop()
             self.current_audio_path = os.path.join("datasets", "audio", filename)
 
     def browse_wav_file(self):
         path, _ = QFileDialog.getOpenFileName(self, "Pilih Dataset Audio", "", "Audio Files (*.wav *.mp3)")
         if path:
+            self.player.stop()
             self.current_audio_path = path
             self.lbl_audio_status.setText(f"File eksternal dipilih: {os.path.basename(path)}")
 
@@ -388,13 +385,30 @@ class FeatureExtractionApp(QMainWindow):
             QMessageBox.warning(self, "Peringatan", "Tidak ada file audio yang dipilih!")
             return
 
-        df_dummy = pd.DataFrame({
-            "Koefisien": [f"MFCC_{i}" for i in range(1, 6)],
-            "Mean": [-108.5, 79.4, -12.1, 18.7, -6.2],
-            "Std Dev": [41.2, 19.8, 13.5, 10.4, 8.9]
-        })
-        self.populate_table(self.table_mfcc, df_dummy)
-        self.lbl_audio_status.setText(f"UI Sukses! Siap hubungkan modules/audio_mfcc.py ({os.path.basename(self.current_audio_path)})")
+        try:
+            self.lbl_audio_status.setText("Status: Memproses audio (Noise Reduction & MFCC)...")
+            QApplication.processEvents()
+
+            df_mfcc, meta = analyze_audio_mfcc(
+                audio_path=self.current_audio_path,
+                fig_mfcc=self.canvas_mfcc.fig,
+                n_mfcc=13
+            )
+
+            # Render ulang kanvas MFCC di PyQt6
+            self.canvas_mfcc.draw()
+
+            # Tampilkan hasil statistik 13 koefisien ke tabel
+            self.populate_table(self.table_mfcc, df_mfcc)
+
+            self.lbl_audio_status.setText(
+                f"Selesai! File: {os.path.basename(self.current_audio_path)} | "
+                f"Durasi: {meta['durasi']}s | SR: {meta['sample_rate']} Hz | "
+                f"Matrix MFCC: {meta['shape_mfcc']}"
+            )
+        except Exception as e:
+            QMessageBox.critical(self, "Error Pemrosesan Audio", f"Terjadi kesalahan:\n{str(e)}")
+            self.lbl_audio_status.setText("Status: Gagal memproses audio.")
 
 
 if __name__ == "__main__":
