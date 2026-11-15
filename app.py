@@ -1,6 +1,7 @@
 import os
 import sys
 import shutil
+from modules.text_tfidf import analyze_text_csv
 import pandas as pd
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
@@ -152,6 +153,11 @@ class FeatureExtractionApp(QMainWindow):
         self.spin_doc_idx = QSpinBox()
         self.spin_doc_idx.setMinimum(0)
         self.spin_doc_idx.setMaximum(9999)
+        lbl_language = QLabel("Bahasa Dataset:")
+        lbl_language.setObjectName("FieldLabel")
+        self.combo_language = QComboBox()
+        self.combo_language.addItem("Bahasa Inggris", "english")
+        self.combo_language.addItem("Bahasa Indonesia", "indonesian")
 
         btn_run_text = QPushButton("Jalankan Preprocessing & TF-IDF")
         btn_run_text.setObjectName("PrimaryButton")
@@ -168,6 +174,8 @@ class FeatureExtractionApp(QMainWindow):
         left_layout.addWidget(btn_browse_csv)
         left_layout.addWidget(lbl_idx)
         left_layout.addWidget(self.spin_doc_idx)
+        left_layout.addWidget(lbl_language)
+        left_layout.addWidget(self.combo_language)
         left_layout.addSpacing(8)
         left_layout.addWidget(btn_run_text)
         left_layout.addWidget(self.lbl_text_status)
@@ -410,8 +418,65 @@ class FeatureExtractionApp(QMainWindow):
 
     def run_text_preview(self):
         if not self.current_csv_path or not os.path.exists(self.current_csv_path):
-            QMessageBox.warning(self, "Peringatan", "Tidak ada file CSV yang dipilih!")
+            QMessageBox.warning(self, "Peringatan", "Pilih file CSV terlebih dahulu!")
             return
+
+        try:
+            language = self.combo_language.currentData() if hasattr(self, "combo_language") else "english"
+            result = analyze_text_csv(
+                self.current_csv_path,
+                document_index=self.spin_doc_idx.value(),
+                language=language,
+                max_features=30
+            )
+
+            selected = result["selected"]
+            self.txt_raw[1].setText(selected["raw"])
+            self.txt_case[1].setText(selected["case_folding"])
+            self.txt_clean[1].setText(selected["cleaning"])
+            self.txt_token[1].setText(str(selected["tokens"]))
+            self.txt_lemma[1].setText(
+                "Setelah stopword removal: " + str(selected["without_stopwords"]) +
+                "\\n\\nHasil akhir (" + result["method_name"] + "):\\n" +
+                str(selected["final_tokens"])
+            )
+
+            # Tampilkan matriks TF-IDF seluruh dokumen.
+            tfidf_display = result["tfidf_matrix"].reset_index()
+            self.populate_table(self.table_tfidf, tfidf_display)
+
+            # Grafik term dengan skor tertinggi pada dokumen yang dipilih.
+            self.canvas_tfidf.axes.clear()
+            top_terms = result["top_terms"][:15]
+            if top_terms:
+                terms = [item[0] for item in top_terms][::-1]
+                scores = [item[1] for item in top_terms][::-1]
+                self.canvas_tfidf.axes.barh(terms, scores, color="#2563EB")
+                self.canvas_tfidf.axes.set_title(
+                    f"Top TF-IDF Terms - Dokumen {result['selected_index'] + 1}"
+                )
+                self.canvas_tfidf.axes.set_xlabel("Nilai TF-IDF")
+            else:
+                self.canvas_tfidf.axes.text(
+                    0.5, 0.5, "Tidak ada term yang dapat dihitung",
+                    ha="center", va="center"
+                )
+            self.canvas_tfidf.fig.tight_layout()
+            self.canvas_tfidf.draw()
+
+            self.lbl_text_status.setText(
+                f"Berhasil! {result['document_count']} dokumen | "
+                f"Kolom: {result['text_column']} | "
+                f"{result['feature_count']} fitur TF-IDF."
+            )
+
+        except Exception as error:
+            QMessageBox.critical(
+                self, "Gagal Memproses Data Teks",
+                f"Terjadi kesalahan saat preprocessing/TF-IDF:\\n{error}"
+            )
+            self.lbl_text_status.setText("Status: Pemrosesan gagal.")
+
 
         idx = self.spin_doc_idx.value()
         self.txt_raw[1].setText(f"[Preview baris #{idx}] The acting and cinematography were breathtaking!")
