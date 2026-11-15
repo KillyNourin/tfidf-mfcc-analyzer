@@ -1,13 +1,15 @@
 import os
 import sys
+import shutil
 import pandas as pd
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QLabel, QPushButton, QComboBox, QSpinBox, QTextEdit, QTabWidget,
     QFrame, QFileDialog, QTableWidget, QTableWidgetItem, QScrollArea,
-    QHeaderView, QMessageBox
+    QHeaderView, QMessageBox, QGraphicsDropShadowEffect
 )
 from PyQt6.QtCore import Qt, QUrl
+from PyQt6.QtGui import QColor
 from PyQt6.QtMultimedia import QMediaPlayer, QAudioOutput
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
@@ -23,28 +25,39 @@ def resource_path(relative_path):
     return os.path.join(base_path, relative_path)
 
 
+def apply_glass_shadow(widget):
+    """Memberikan efek bayangan lembut agar kartu kaca tampak melayang"""
+    shadow = QGraphicsDropShadowEffect(widget)
+    shadow.setBlurRadius(28)
+    shadow.setXOffset(0)
+    shadow.setYOffset(8)
+    shadow.setColor(QColor(15, 23, 42, 22))
+    widget.setGraphicsEffect(shadow)
+
+
 class MplCanvas(FigureCanvas):
-    """Widget kanvas Matplotlib agar grafik tampil langsung di dalam jendela desktop"""
+    """Kanvas Matplotlib dengan warna dasar lembut menyatu dengan panel kaca"""
     def __init__(self, width=6, height=3.2, dpi=100):
-        self.fig = Figure(figsize=(width, height), dpi=dpi, facecolor="#FFFFFF")
+        self.fig = Figure(figsize=(width, height), dpi=dpi, facecolor="#F6F9FE")
         self.axes = self.fig.add_subplot(111)
+        self.axes.set_facecolor("#FFFFFF")
         super().__init__(self.fig)
 
 
 class FeatureExtractionApp(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("UTS Pengolahan Data Tidak Terstruktur - TF-IDF & MFCC Analyzer")
+        self.setWindowTitle("UTS Pengolahan Data Tidak Terstruktur • Glass Analyzer")
         self.resize(1360, 840)
 
-        # Pastikan folder dataset ada
         os.makedirs("datasets/text", exist_ok=True)
         os.makedirs("datasets/audio", exist_ok=True)
 
         self.current_csv_path = None
         self.current_audio_path = None
+        self.audio_before_path = None
+        self.audio_after_path = None
 
-        # Pemutar Audio Desktop
         self.player = QMediaPlayer()
         self.audio_output = QAudioOutput()
         self.player.setAudioOutput(self.audio_output)
@@ -65,18 +78,19 @@ class FeatureExtractionApp(QMainWindow):
         self.setCentralWidget(central_widget)
 
         main_layout = QVBoxLayout(central_widget)
-        main_layout.setContentsMargins(20, 16, 20, 16)
+        main_layout.setContentsMargins(22, 18, 22, 18)
         main_layout.setSpacing(14)
 
-        # ================= HEADER =================
+        # ================= HEADER GLASS =================
         header_card = QFrame()
         header_card.setObjectName("HeaderCard")
+        apply_glass_shadow(header_card)
         header_layout = QVBoxLayout(header_card)
-        header_layout.setContentsMargins(22, 16, 22, 16)
+        header_layout.setContentsMargins(24, 16, 24, 16)
         header_layout.setSpacing(6)
 
         badge_row = QHBoxLayout()
-        badge = QLabel("UTS Pengolahan Data Tidak Terstruktur • Desktop App")
+        badge = QLabel("UTS Pengolahan Data Tidak Terstruktur • Glassmorphism UI")
         badge.setObjectName("HeaderBadge")
         badge_row.addWidget(badge)
         badge_row.addStretch()
@@ -85,8 +99,8 @@ class FeatureExtractionApp(QMainWindow):
         title.setObjectName("HeaderTitle")
 
         subtitle = QLabel(
-            "Aplikasi desktop mandiri untuk mengeksplorasi tahapan preprocessing (NLTK & Librosa) "
-            "serta ekstraksi fitur pada data tidak terstruktur."
+            "Eksplorasi tahapan preprocessing (NLTK & NoiseReduce) serta ekstraksi fitur "
+            "berbasis aplikasi desktop."
         )
         subtitle.setObjectName("HeaderSubtitle")
 
@@ -110,17 +124,17 @@ class FeatureExtractionApp(QMainWindow):
         layout.setContentsMargins(0, 10, 0, 0)
         layout.setSpacing(16)
 
-        # Panel Kiri: Kontrol Dataset Teks
         left_card = QFrame()
         left_card.setObjectName("PanelCard")
         left_card.setFixedWidth(360)
+        apply_glass_shadow(left_card)
         left_layout = QVBoxLayout(left_card)
-        left_layout.setContentsMargins(18, 18, 18, 18)
+        left_layout.setContentsMargins(20, 20, 20, 20)
         left_layout.setSpacing(10)
 
         lbl_title = QLabel("Konfigurasi Dataset Teks")
         lbl_title.setObjectName("SectionTitle")
-        lbl_desc = QLabel("Pilih file CSV dari folder datasets/text atau cari file dari komputer.")
+        lbl_desc = QLabel("Pilih file CSV dari folder datasets/text atau unggah file baru.")
         lbl_desc.setObjectName("SectionDesc")
         lbl_desc.setWordWrap(True)
 
@@ -129,11 +143,11 @@ class FeatureExtractionApp(QMainWindow):
         self.combo_csv = QComboBox()
         self.combo_csv.currentTextChanged.connect(self.on_select_local_csv)
 
-        btn_browse_csv = QPushButton("Browse File CSV Lain...")
+        btn_browse_csv = QPushButton("+ Browse & Simpan CSV")
         btn_browse_csv.setObjectName("SecondaryButton")
         btn_browse_csv.clicked.connect(self.browse_csv_file)
 
-        lbl_idx = QLabel("Indeks Baris Dokumen yang Diinspeksi:")
+        lbl_idx = QLabel("Indeks Baris Dokumen:")
         lbl_idx.setObjectName("FieldLabel")
         self.spin_doc_idx = QSpinBox()
         self.spin_doc_idx.setMinimum(0)
@@ -159,15 +173,15 @@ class FeatureExtractionApp(QMainWindow):
         left_layout.addWidget(self.lbl_text_status)
         left_layout.addStretch()
 
-        # Panel Kanan: Scroll Area Hasil Preprocessing & TF-IDF
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
         scroll.setFrameShape(QFrame.Shape.NoFrame)
 
         right_card = QFrame()
         right_card.setObjectName("PanelCard")
+        apply_glass_shadow(right_card)
         right_layout = QVBoxLayout(right_card)
-        right_layout.setContentsMargins(20, 20, 20, 20)
+        right_layout.setContentsMargins(22, 22, 22, 22)
         right_layout.setSpacing(10)
 
         sec1 = QLabel("Hasil Tahapan Preprocessing Teks (NLTK)")
@@ -205,7 +219,7 @@ class FeatureExtractionApp(QMainWindow):
         return tab
 
     # ---------------------------------------------------------
-    # TAB 2: DATA AUDIO (MFCC) - TANPA WAVEFORM
+    # TAB 2: DATA AUDIO (MFCC) + PEMUTAR BEFORE (ASLI) & AFTER (CLEAN)
     # ---------------------------------------------------------
     def build_audio_tab(self):
         tab = QWidget()
@@ -213,17 +227,17 @@ class FeatureExtractionApp(QMainWindow):
         layout.setContentsMargins(0, 10, 0, 0)
         layout.setSpacing(16)
 
-        # Panel Kiri: Kontrol Dataset Audio
         left_card = QFrame()
         left_card.setObjectName("PanelCard")
         left_card.setFixedWidth(360)
+        apply_glass_shadow(left_card)
         left_layout = QVBoxLayout(left_card)
-        left_layout.setContentsMargins(18, 18, 18, 18)
+        left_layout.setContentsMargins(20, 20, 20, 20)
         left_layout.setSpacing(10)
 
         lbl_title = QLabel("Konfigurasi Dataset Audio")
         lbl_title.setObjectName("SectionTitle")
-        lbl_desc = QLabel("Pilih file .wav/.mp3 dari datasets/audio atau cari dari komputer.")
+        lbl_desc = QLabel("Pilih file .wav/.mp3 dari folder datasets/audio atau unggah file baru.")
         lbl_desc.setObjectName("SectionDesc")
         lbl_desc.setWordWrap(True)
 
@@ -232,26 +246,35 @@ class FeatureExtractionApp(QMainWindow):
         self.combo_wav = QComboBox()
         self.combo_wav.currentTextChanged.connect(self.on_select_local_wav)
 
-        btn_browse_wav = QPushButton("Browse File Audio Lain...")
+        btn_browse_wav = QPushButton("+ Browse & Simpan Audio")
         btn_browse_wav.setObjectName("SecondaryButton")
         btn_browse_wav.clicked.connect(self.browse_wav_file)
-
-        # Tombol Play / Stop Audio
-        player_row = QHBoxLayout()
-        btn_play = QPushButton("▶ Putar Audio")
-        btn_play.setObjectName("SecondaryButton")
-        btn_play.clicked.connect(self.play_audio)
-
-        btn_stop = QPushButton("■ Stop")
-        btn_stop.setObjectName("SecondaryButton")
-        btn_stop.clicked.connect(self.player.stop)
-
-        player_row.addWidget(btn_play)
-        player_row.addWidget(btn_stop)
 
         btn_run_audio = QPushButton("Jalankan Preprocessing & MFCC")
         btn_run_audio.setObjectName("PrimaryButton")
         btn_run_audio.clicked.connect(self.run_audio_preview)
+
+        # Pemutar Perbandingan Audio: Before (Asli) vs After (Noise Reduced)
+        lbl_player = QLabel("Pemutar Audio (Before vs After):")
+        lbl_player.setObjectName("FieldLabel")
+
+        row_ba = QHBoxLayout()
+        self.btn_play_before = QPushButton("▶ Before (Asli)")
+        self.btn_play_before.setObjectName("SecondaryButton")
+        self.btn_play_before.setEnabled(False)
+        self.btn_play_before.clicked.connect(lambda: self.play_audio_file(self.audio_before_path, "Before (Audio Asli)"))
+
+        self.btn_play_after = QPushButton("▶ After (Clean)")
+        self.btn_play_after.setObjectName("SecondaryButton")
+        self.btn_play_after.setEnabled(False)
+        self.btn_play_after.clicked.connect(lambda: self.play_audio_file(self.audio_after_path, "After (Noise Reduced)"))
+
+        row_ba.addWidget(self.btn_play_before)
+        row_ba.addWidget(self.btn_play_after)
+
+        btn_stop = QPushButton("■ Stop Audio")
+        btn_stop.setObjectName("SecondaryButton")
+        btn_stop.clicked.connect(self.stop_audio)
 
         self.lbl_audio_status = QLabel("Status: Siap memproses data audio.")
         self.lbl_audio_status.setObjectName("SectionDesc")
@@ -262,21 +285,25 @@ class FeatureExtractionApp(QMainWindow):
         left_layout.addWidget(lbl_combo)
         left_layout.addWidget(self.combo_wav)
         left_layout.addWidget(btn_browse_wav)
-        left_layout.addLayout(player_row)
-        left_layout.addSpacing(8)
+        left_layout.addSpacing(4)
         left_layout.addWidget(btn_run_audio)
+        left_layout.addSpacing(6)
+        left_layout.addWidget(lbl_player)
+        left_layout.addLayout(row_ba)
+        left_layout.addWidget(btn_stop)
+        left_layout.addSpacing(4)
         left_layout.addWidget(self.lbl_audio_status)
         left_layout.addStretch()
 
-        # Panel Kanan: Grafik MFCC & Tabel Statistik
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
         scroll.setFrameShape(QFrame.Shape.NoFrame)
 
         right_card = QFrame()
         right_card.setObjectName("PanelCard")
+        apply_glass_shadow(right_card)
         right_layout = QVBoxLayout(right_card)
-        right_layout.setContentsMargins(20, 20, 20, 20)
+        right_layout.setContentsMargins(22, 22, 22, 22)
         right_layout.setSpacing(12)
 
         sec_mfcc = QLabel("Visualisasi Ekstraksi Fitur (MFCC Heatmap & Statistik 13 Koefisien)")
@@ -298,7 +325,9 @@ class FeatureExtractionApp(QMainWindow):
         layout.addWidget(scroll)
         return tab
 
-    # FUNGSI PEMBANTU UI & EVENT HANDLER
+    # ---------------------------------------------------------
+    # EVENT HANDLER & PEMBANTU UI
+    # ---------------------------------------------------------
     def create_readonly_box(self, label_text, max_height):
         lbl = QLabel(label_text)
         lbl.setObjectName("FieldLabel")
@@ -323,27 +352,53 @@ class FeatureExtractionApp(QMainWindow):
     def browse_csv_file(self):
         path, _ = QFileDialog.getOpenFileName(self, "Pilih Dataset CSV", "", "CSV Files (*.csv)")
         if path:
-            self.current_csv_path = path
-            self.lbl_text_status.setText(f"File eksternal dipilih: {os.path.basename(path)}")
+            filename = os.path.basename(path)
+            dest_path = os.path.join("datasets", "text", filename)
+            if os.path.abspath(path) != os.path.abspath(dest_path):
+                shutil.copy2(path, dest_path)
+            self.refresh_local_files()
+            self.combo_csv.setCurrentText(filename)
+            self.current_csv_path = dest_path
+            self.lbl_text_status.setText(f"Tersimpan di datasets/text/: {filename}")
 
     def on_select_local_wav(self, filename):
         if filename:
-            self.player.stop()
+            self.stop_audio()
             self.current_audio_path = os.path.join("datasets", "audio", filename)
+            self.audio_before_path = os.path.abspath(self.current_audio_path)
+            self.audio_after_path = None
+            if hasattr(self, "btn_play_before"):
+                self.btn_play_before.setEnabled(True)
+                self.btn_play_after.setEnabled(False)
 
     def browse_wav_file(self):
         path, _ = QFileDialog.getOpenFileName(self, "Pilih Dataset Audio", "", "Audio Files (*.wav *.mp3)")
         if path:
-            self.player.stop()
-            self.current_audio_path = path
-            self.lbl_audio_status.setText(f"File eksternal dipilih: {os.path.basename(path)}")
+            self.stop_audio()
+            filename = os.path.basename(path)
+            dest_path = os.path.join("datasets", "audio", filename)
+            if os.path.abspath(path) != os.path.abspath(dest_path):
+                shutil.copy2(path, dest_path)
+            self.refresh_local_files()
+            self.combo_wav.setCurrentText(filename)
+            self.current_audio_path = dest_path
+            self.audio_before_path = os.path.abspath(dest_path)
+            self.btn_play_before.setEnabled(True)
+            self.btn_play_after.setEnabled(False)
+            self.lbl_audio_status.setText(f"Tersimpan di datasets/audio/: {filename}")
 
-    def play_audio(self):
-        if not self.current_audio_path or not os.path.exists(self.current_audio_path):
-            QMessageBox.warning(self, "Peringatan", "Pilih file audio terlebih dahulu!")
+    def play_audio_file(self, file_path, label_mode):
+        if not file_path or not os.path.exists(file_path):
+            QMessageBox.warning(self, "Peringatan", f"File {label_mode} belum tersedia. Jalankan proses MFCC dulu!")
             return
-        self.player.setSource(QUrl.fromLocalFile(os.path.abspath(self.current_audio_path)))
+        self.player.stop()
+        self.player.setSource(QUrl.fromLocalFile(os.path.abspath(file_path)))
         self.player.play()
+        self.lbl_audio_status.setText(f"Memutar: {label_mode} ({os.path.basename(file_path)})")
+
+    def stop_audio(self):
+        self.player.stop()
+        self.player.setSource(QUrl())
 
     def populate_table(self, table_widget, df):
         table_widget.setRowCount(len(df))
@@ -358,7 +413,6 @@ class FeatureExtractionApp(QMainWindow):
             QMessageBox.warning(self, "Peringatan", "Tidak ada file CSV yang dipilih!")
             return
 
-        # Preview UI sementara sebelum dihubungkan ke modules/text_tfidf.py
         idx = self.spin_doc_idx.value()
         self.txt_raw[1].setText(f"[Preview baris #{idx}] The acting and cinematography were breathtaking!")
         self.txt_case[1].setText("the acting and cinematography were breathtaking!")
@@ -373,12 +427,12 @@ class FeatureExtractionApp(QMainWindow):
         self.populate_table(self.table_tfidf, df_dummy)
 
         self.canvas_tfidf.axes.clear()
-        self.canvas_tfidf.axes.barh(df_dummy["Term"], df_dummy["TF-IDF Score"], color="#2563EB")
-        self.canvas_tfidf.axes.set_title("Top TF-IDF Terms (Preview UI)")
+        self.canvas_tfidf.axes.barh(df_dummy["Term"], df_dummy["TF-IDF Score"], color="#3B82F6")
+        self.canvas_tfidf.axes.set_title("Top TF-IDF Terms (Preview UI)", fontweight="bold")
         self.canvas_tfidf.fig.tight_layout()
         self.canvas_tfidf.draw()
 
-        self.lbl_text_status.setText(f"UI Sukses! Siap hubungkan modules/text_tfidf.py ({os.path.basename(self.current_csv_path)})")
+        self.lbl_text_status.setText(f"Sukses! Siap hubungkan modules/text_tfidf.py ({os.path.basename(self.current_csv_path)})")
 
     def run_audio_preview(self):
         if not self.current_audio_path or not os.path.exists(self.current_audio_path):
@@ -386,7 +440,8 @@ class FeatureExtractionApp(QMainWindow):
             return
 
         try:
-            self.lbl_audio_status.setText("Status: Memproses audio (Noise Reduction & MFCC)...")
+            self.stop_audio()
+            self.lbl_audio_status.setText("Status: Memproses NoiseReduce & MFCC...")
             QApplication.processEvents()
 
             df_mfcc, meta = analyze_audio_mfcc(
@@ -395,16 +450,18 @@ class FeatureExtractionApp(QMainWindow):
                 n_mfcc=13
             )
 
-            # Render ulang kanvas MFCC di PyQt6
-            self.canvas_mfcc.draw()
+            self.audio_before_path = meta["before_path"]
+            self.audio_after_path = meta["after_path"]
+            self.btn_play_before.setEnabled(True)
+            self.btn_play_after.setEnabled(True)
 
-            # Tampilkan hasil statistik 13 koefisien ke tabel
+            self.canvas_mfcc.draw()
             self.populate_table(self.table_mfcc, df_mfcc)
 
             self.lbl_audio_status.setText(
-                f"Selesai! File: {os.path.basename(self.current_audio_path)} | "
+                f"Selesai! {os.path.basename(self.current_audio_path)} | "
                 f"Durasi: {meta['durasi']}s | SR: {meta['sample_rate']} Hz | "
-                f"Matrix MFCC: {meta['shape_mfcc']}"
+                f"Matrix: {meta['shape_mfcc']}"
             )
         except Exception as e:
             QMessageBox.critical(self, "Error Pemrosesan Audio", f"Terjadi kesalahan:\n{str(e)}")

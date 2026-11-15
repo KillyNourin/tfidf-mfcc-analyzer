@@ -1,42 +1,44 @@
 import os
+import tempfile
 import numpy as np
 import pandas as pd
 import librosa
 import librosa.display
+import soundfile as sf
 import noisereduce as nr
 
 
 def analyze_audio_mfcc(audio_path, fig_mfcc, n_mfcc=13):
     """
-    Alur preprocessing & ekstraksi fitur sesuai kode dosen (untitled1.py):
-    1. Load audio asli (y_asli, sr)
-    2. Penambahan noise buatan (y_kotor) untuk simulasi
-    3. Preprocessing dengan noisereduce (stationary=True, n_std_thresh_stationary=1.0)
-    4. Ekstraksi 13 koefisien MFCC dari y_bersih
-    5. Plotting MFCC Heatmap ke kanvas PyQt6 & return statistik koefisien
+    Alur preprocessing & ekstraksi fitur:
+    1. Load audio asli (y_asli, sr) -> Audio BEFORE
+    2. Preprocessing langsung dengan noisereduce (y_bersih -> Audio AFTER)
+    3. Simpan file sementara WAV After untuk diputar di UI
+    4. Ekstraksi 13 koefisien MFCC dari y_bersih & plot Heatmap
     """
     nama_file = os.path.basename(audio_path)
 
-    # 1. Load Audio Asli
+    # 1. Load Audio Asli (Audio BEFORE preprocessing)
     y_asli, sr = librosa.load(audio_path)
     durasi = librosa.get_duration(y=y_asli, sr=sr)
 
-    # 2. Noise Buatan (sesuai kode dosen)
-    noise = np.random.randn(len(y_asli)) * 0.015
-    y_kotor = y_asli + noise
-
-    # 3. Preprocessing (Noise Reduction sesuai parameter dosen)
+    # 2. Preprocessing Noise Reduction langsung pada audio asli (Audio AFTER)
     y_bersih = nr.reduce_noise(
-        y=y_kotor,
+        y=y_asli,
         sr=sr,
         n_std_thresh_stationary=1.0,
         stationary=True
     )
+    y_bersih = np.clip(y_bersih, -1.0, 1.0)
+
+    # 3. Simpan audio After ke folder temp sistem (format PCM_16)
+    temp_dir = tempfile.gettempdir()
+    after_path = os.path.join(temp_dir, "uts_audio_after_clean.wav")
+    sf.write(after_path, y_bersih, sr, subtype="PCM_16")
 
     # 4. Ekstraksi Fitur MFCC (Sidik Jari Suara BERSIH)
     mfcc = librosa.feature.mfcc(y=y_bersih, sr=sr, n_mfcc=n_mfcc)
 
-    # Hitung statistik 13 koefisien MFCC untuk tabel UI
     df_stats = pd.DataFrame({
         "Koefisien": [f"MFCC_{i+1}" for i in range(n_mfcc)],
         "Mean": np.round(np.mean(mfcc, axis=1), 4),
@@ -45,7 +47,7 @@ def analyze_audio_mfcc(audio_path, fig_mfcc, n_mfcc=13):
         "Max": np.round(np.max(mfcc, axis=1), 4),
     })
 
-    # 5. Visualisasi MFCC (Tanpa Waveform)
+    # 5. Visualisasi MFCC Heatmap
     fig_mfcc.clear()
     ax = fig_mfcc.add_subplot(1, 1, 1)
     img = librosa.display.specshow(mfcc, x_axis="time", sr=sr, ax=ax)
@@ -63,7 +65,9 @@ def analyze_audio_mfcc(audio_path, fig_mfcc, n_mfcc=13):
     metadata = {
         "sample_rate": sr,
         "durasi": round(durasi, 2),
-        "shape_mfcc": mfcc.shape
+        "shape_mfcc": mfcc.shape,
+        "before_path": os.path.abspath(audio_path),
+        "after_path": after_path
     }
 
     return df_stats, metadata
