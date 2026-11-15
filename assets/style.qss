@@ -1,0 +1,169 @@
+/* =============================================================
+   Gaya Visual Desktop PyQt6: Ekstraksi Fitur TF-IDF & MFCC
+   ============================================================= */
+
+QMainWindow, QWidget#CentralWidget {
+    background-color: #F8FAFC;
+    color: #0F172A;
+    font-family: "Segoe UI", Inter, sans-serif;
+    font-size: 13px;
+}
+
+/* Header Utama */
+QFrame#HeaderCard {
+    background-color: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 12px;
+}
+
+QLabel#HeaderBadge {
+    background-color: #EFF6FF;
+    color: #1D4ED8;
+    border: 1px solid #BFDBFE;
+    border-radius: 10px;
+    padding: 4px 12px;
+    font-size: 11px;
+    font-weight: bold;
+}
+
+QLabel#HeaderTitle {
+    color: #0F172A;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+QLabel#HeaderSubtitle {
+    color: #64748B;
+    font-size: 13px;
+}
+
+/* Kartu Panel */
+QFrame#PanelCard {
+    background-color: #FFFFFF;
+    border: 1px solid #E2E8F0;
+    border-radius: 12px;
+}
+
+QLabel#SectionTitle {
+    color: #0F172A;
+    font-size: 15px;
+    font-weight: bold;
+}
+
+QLabel#SectionDesc {
+    color: #64748B;
+    font-size: 12px;
+}
+
+QLabel#FieldLabel {
+    color: #1E293B;
+    font-weight: 600;
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+/* Tab Navigasi */
+QTabWidget::pane {
+    border: none;
+    background: transparent;
+}
+
+QTabBar::tab {
+    background-color: #E2E8F0;
+    color: #475569;
+    padding: 10px 22px;
+    margin-right: 6px;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    font-weight: bold;
+}
+
+QTabBar::tab:selected {
+    background-color: #FFFFFF;
+    color: #2563EB;
+    border: 1px solid #E2E8F0;
+    border-bottom: 2px solid #2563EB;
+}
+
+QTabBar::tab:hover:!selected {
+    background-color: #CBD5E1;
+    color: #0F172A;
+}
+
+/* Input, ComboBox, SpinBox, TextEdit */
+QComboBox, QSpinBox, QTextEdit {
+    background-color: #F8FAFC;
+    color: #0F172A;
+    border: 1px solid #CBD5E1;
+    border-radius: 8px;
+    padding: 6px 10px;
+}
+
+QComboBox:focus, QSpinBox:focus, QTextEdit:focus {
+    border: 1px solid #2563EB;
+    background-color: #FFFFFF;
+}
+
+/* Tombol Utama */
+QPushButton#PrimaryButton {
+    background-color: #2563EB;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-weight: bold;
+    font-size: 13px;
+}
+
+QPushButton#PrimaryButton:hover {
+    background-color: #1D4ED8;
+}
+
+QPushButton#PrimaryButton:pressed {
+    background-color: #1E40AF;
+}
+
+/* Tombol Sekunder */
+QPushButton#SecondaryButton {
+    background-color: #F1F5F9;
+    color: #0F172A;
+    border: 1px solid #CBD5E1;
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-weight: 600;
+}
+
+QPushButton#SecondaryButton:hover {
+    background-color: #E2E8F0;
+}
+
+/* Tabel Data */
+QTableWidget {
+    background-color: #FFFFFF;
+    color: #0F172A;
+    gridline-color: #E2E8F0;
+    border: 1px solid #E2E8F0;
+    border-radius: 8px;
+}
+
+QHeaderView::section {
+    background-color: #F1F5F9;
+    color: #1E293B;
+    font-weight: bold;
+    padding: 6px;
+    border: none;
+    border-bottom: 1px solid #CBD5E1;
+}
+
+/* Hilangkan artifak hitam di sudut QTableWidget dan QScrollArea */
+QTableWidget QTableCornerButton::section {
+    background-color: #F1F5F9;
+    border: none;
+}
+
+QScrollArea,
+QScrollArea > QWidget > QWidget,
+QAbstractScrollArea::corner {
+    background-color: transparent;
+    border: none;
+}
