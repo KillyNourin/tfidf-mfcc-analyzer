@@ -1,26 +1,33 @@
 /* =============================================================
-   Gaya Visual Desktop PyQt6: Ekstraksi Fitur TF-IDF & MFCC
+   Gaya Visual Desktop PyQt6: Modern Frosted Glassmorphism UI
    ============================================================= */
 
+/* Latar belakang utama gradasi lembut agar efek kaca transparan terlihat */
 QMainWindow, QWidget#CentralWidget {
-    background-color: #F8FAFC;
+    background: qlineargradient(
+        x1: 0, y1: 0, x2: 1, y2: 1,
+        stop: 0 #DBEAFE,
+        stop: 0.45 #EFF6FF,
+        stop: 0.8 #EDE9FE,
+        stop: 1 #E0F2FE
+    );
     color: #0F172A;
-    font-family: "Segoe UI", Inter, sans-serif;
+    font-family: "Segoe UI", "Inter", sans-serif;
     font-size: 13px;
 }
 
-/* Header Utama */
+/* Header Kaca Melayang */
 QFrame#HeaderCard {
-    background-color: #FFFFFF;
-    border: 1px solid #E2E8F0;
-    border-radius: 12px;
+    background-color: rgba(255, 255, 255, 0.68);
+    border: 1.5px solid rgba(255, 255, 255, 0.95);
+    border-radius: 18px;
 }
 
 QLabel#HeaderBadge {
-    background-color: #EFF6FF;
+    background-color: rgba(37, 99, 235, 0.12);
     color: #1D4ED8;
-    border: 1px solid #BFDBFE;
-    border-radius: 10px;
+    border: 1px solid rgba(37, 99, 235, 0.28);
+    border-radius: 11px;
     padding: 4px 12px;
     font-size: 11px;
     font-weight: bold;
@@ -33,25 +40,27 @@ QLabel#HeaderTitle {
 }
 
 QLabel#HeaderSubtitle {
-    color: #64748B;
+    color: #475569;
     font-size: 13px;
 }
 
-/* Kartu Panel */
+/* Kartu Panel Kaca Buram (Frosted Glass Card) */
 QFrame#PanelCard {
-    background-color: #FFFFFF;
-    border: 1px solid #E2E8F0;
-    border-radius: 12px;
+    background-color: rgba(255, 255, 255, 0.66);
+    border: 1.5px solid rgba(255, 255, 255, 0.92);
+    border-radius: 18px;
 }
 
 QLabel#SectionTitle {
     color: #0F172A;
     font-size: 15px;
     font-weight: bold;
+    padding-bottom: 4px;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.35);
 }
 
 QLabel#SectionDesc {
-    color: #64748B;
+    color: #475569;
     font-size: 12px;
 }
 
@@ -62,108 +71,165 @@ QLabel#FieldLabel {
     margin-top: 4px;
 }
 
-/* Tab Navigasi */
+/* Tab Navigasi Gaya Kapsul Kaca (Pill Glass Tabs) */
 QTabWidget::pane {
     border: none;
     background: transparent;
 }
 
 QTabBar::tab {
-    background-color: #E2E8F0;
+    background-color: rgba(255, 255, 255, 0.42);
     color: #475569;
-    padding: 10px 22px;
-    margin-right: 6px;
-    border-top-left-radius: 8px;
-    border-top-right-radius: 8px;
-    font-weight: bold;
+    padding: 9px 22px;
+    margin-right: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.70);
+    border-radius: 12px;
+    font-weight: 600;
 }
 
 QTabBar::tab:selected {
-    background-color: #FFFFFF;
+    background-color: rgba(255, 255, 255, 0.88);
     color: #2563EB;
-    border: 1px solid #E2E8F0;
-    border-bottom: 2px solid #2563EB;
+    border: 1.5px solid #FFFFFF;
+    font-weight: bold;
 }
 
 QTabBar::tab:hover:!selected {
-    background-color: #CBD5E1;
+    background-color: rgba(255, 255, 255, 0.65);
     color: #0F172A;
 }
 
-/* Input, ComboBox, SpinBox, TextEdit */
+/* Kotak Input, Dropdown, SpinBox Transparan */
 QComboBox, QSpinBox, QTextEdit {
-    background-color: #F8FAFC;
+    background-color: rgba(255, 255, 255, 0.58);
     color: #0F172A;
-    border: 1px solid #CBD5E1;
-    border-radius: 8px;
-    padding: 6px 10px;
+    border: 1px solid rgba(255, 255, 255, 0.90);
+    border-radius: 10px;
+    padding: 7px 10px;
+    selection-background-color: #2563EB;
+    selection-color: #FFFFFF;
 }
 
 QComboBox:focus, QSpinBox:focus, QTextEdit:focus {
-    border: 1px solid #2563EB;
-    background-color: #FFFFFF;
+    background-color: rgba(255, 255, 255, 0.90);
+    border: 1.5px solid #3B82F6;
 }
 
-/* Tombol Utama */
-QPushButton#PrimaryButton {
-    background-color: #2563EB;
-    color: #FFFFFF;
+QComboBox::drop-down {
     border: none;
+    width: 26px;
+}
+
+QComboBox QAbstractItemView {
+    background-color: #FFFFFF;
+    color: #0F172A;
+    border: 1px solid #CBD5E1;
     border-radius: 8px;
-    padding: 10px 16px;
+    selection-background-color: #EFF6FF;
+    selection-color: #1D4ED8;
+}
+
+/* Tombol Utama (Gradient Glass Blue-Indigo) */
+QPushButton#PrimaryButton {
+    background: qlineargradient(
+        x1: 0, y1: 0, x2: 1, y2: 0,
+        stop: 0 rgba(37, 99, 235, 0.92),
+        stop: 1 rgba(79, 70, 229, 0.92)
+    );
+    color: #FFFFFF;
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    border-radius: 12px;
+    padding: 11px 16px;
     font-weight: bold;
     font-size: 13px;
 }
 
 QPushButton#PrimaryButton:hover {
-    background-color: #1D4ED8;
+    background: qlineargradient(
+        x1: 0, y1: 0, x2: 1, y2: 0,
+        stop: 0 rgba(29, 78, 216, 0.98),
+        stop: 1 rgba(67, 56, 202, 0.98)
+    );
 }
 
 QPushButton#PrimaryButton:pressed {
     background-color: #1E40AF;
 }
 
-/* Tombol Sekunder */
+/* Tombol Sekunder (Frosted Glass Button) */
 QPushButton#SecondaryButton {
-    background-color: #F1F5F9;
-    color: #0F172A;
-    border: 1px solid #CBD5E1;
-    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.65);
+    color: #1E293B;
+    border: 1px solid rgba(255, 255, 255, 0.95);
+    border-radius: 10px;
     padding: 8px 14px;
     font-weight: 600;
 }
 
 QPushButton#SecondaryButton:hover {
-    background-color: #E2E8F0;
+    background-color: rgba(255, 255, 255, 0.92);
+    color: #2563EB;
 }
 
-/* Tabel Data */
+QPushButton#SecondaryButton:pressed {
+    background-color: rgba(226, 232, 240, 0.85);
+}
+
+QPushButton#SecondaryButton:disabled {
+    background-color: rgba(241, 245, 249, 0.35);
+    color: #94A3B8;
+    border: 1px solid rgba(203, 213, 225, 0.5);
+}
+
+/* Tabel Data Kaca */
 QTableWidget {
-    background-color: #FFFFFF;
+    background-color: rgba(255, 255, 255, 0.62);
     color: #0F172A;
-    gridline-color: #E2E8F0;
-    border: 1px solid #E2E8F0;
-    border-radius: 8px;
+    gridline-color: rgba(203, 213, 225, 0.65);
+    border: 1px solid rgba(255, 255, 255, 0.92);
+    border-radius: 12px;
 }
 
 QHeaderView::section {
-    background-color: #F1F5F9;
+    background-color: rgba(241, 245, 249, 0.85);
     color: #1E293B;
     font-weight: bold;
-    padding: 6px;
+    padding: 7px;
     border: none;
-    border-bottom: 1px solid #CBD5E1;
+    border-bottom: 1px solid rgba(203, 213, 225, 0.8);
 }
 
-/* Hilangkan artifak hitam di sudut QTableWidget dan QScrollArea */
 QTableWidget QTableCornerButton::section {
-    background-color: #F1F5F9;
+    background-color: rgba(241, 245, 249, 0.85);
     border: none;
 }
 
+/* ScrollArea & Scrollbar Minimalis Transparan */
 QScrollArea,
 QScrollArea > QWidget > QWidget,
 QAbstractScrollArea::corner {
     background-color: transparent;
     border: none;
+}
+
+QScrollBar:vertical {
+    background: rgba(255, 255, 255, 0.25);
+    width: 8px;
+    margin: 4px 2px 4px 2px;
+    border-radius: 4px;
+}
+
+QScrollBar::handle:vertical {
+    background: rgba(100, 116, 139, 0.45);
+    min-height: 28px;
+    border-radius: 4px;
+}
+
+QScrollBar::handle:vertical:hover {
+    background: rgba(37, 99, 235, 0.65);
+}
+
+QScrollBar::add-line:vertical,
+QScrollBar::sub-line:vertical {
+    height: 0px;
 }

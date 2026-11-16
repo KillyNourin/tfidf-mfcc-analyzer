@@ -1,0 +1,1 @@
+        self.lbl_text_status = QLabel("Status: Siap memproses data teks.")
