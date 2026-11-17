@@ -12,7 +12,6 @@ Aplikasi desktop berbasis **Python** dan **PyQt6**. Aplikasi ini dirancang untuk
 ### 2. Analisis Data Audio (Noise Reduction & MFCC Heatmap)
 ![Tampilan Analisis Audio MFCC](assets/preview_audio.png)
 
-> **Catatan:** Simpan 2 file screenshot hasil aplikasimu ke dalam folder `assets/` dengan nama `preview_text.png` dan `preview_audio.png` agar gambar otomatis tampil di GitHub.
 
 ---
 
