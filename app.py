@@ -76,6 +76,7 @@ class FeatureExtractionApp(QMainWindow):
         AUDIO_DATASET_DIR.mkdir(parents=True, exist_ok=True)
 
         self.current_csv_path = None
+        self.current_text_export_df = None
         self.current_audio_path = None
         self.audio_before_path = None
         self.audio_after_path = None
@@ -119,15 +120,9 @@ class FeatureExtractionApp(QMainWindow):
 
         title = QLabel("Ekstraksi Fitur Data Teks (TF-IDF) dan Data Audio (MFCC)")
         title.setObjectName("HeaderTitle")
-        subtitle = QLabel(
-            "Eksplorasi tahapan preprocessing (NLTK & NoiseReduce) serta ekstraksi fitur "
-            "berbasis aplikasi desktop."
-        )
-        subtitle.setObjectName("HeaderSubtitle")
 
         header_layout.addLayout(badge_row)
         header_layout.addWidget(title)
-        header_layout.addWidget(subtitle)
         main_layout.addWidget(header_card)
 
         self.tabs = QTabWidget()
@@ -181,6 +176,11 @@ class FeatureExtractionApp(QMainWindow):
         btn_run_text.setObjectName("PrimaryButton")
         btn_run_text.clicked.connect(self.run_text_preview)
 
+        self.btn_download_text = QPushButton("↓ Download Hasil Preprocessing & TF-IDF")
+        self.btn_download_text.setObjectName("SecondaryButton")
+        self.btn_download_text.setEnabled(False)
+        self.btn_download_text.clicked.connect(self.download_text_results)
+
         self.lbl_text_status = QLabel("Status: Siap memproses data teks.")
         self.lbl_text_status.setObjectName("SectionDesc")
         self.lbl_text_status.setWordWrap(True)
@@ -196,6 +196,7 @@ class FeatureExtractionApp(QMainWindow):
         left_layout.addWidget(self.combo_language)
         left_layout.addSpacing(8)
         left_layout.addWidget(btn_run_text)
+        left_layout.addWidget(self.btn_download_text)
         left_layout.addWidget(self.lbl_text_status)
         left_layout.addStretch()
 
@@ -376,6 +377,10 @@ class FeatureExtractionApp(QMainWindow):
         ]:
             box.clear()
 
+        self.current_text_export_df = None
+        if hasattr(self, "btn_download_text"):
+            self.btn_download_text.setEnabled(False)
+
         self.table_tfidf.clear()
         self.table_tfidf.setRowCount(0)
         self.table_tfidf.setColumnCount(0)
@@ -429,6 +434,45 @@ class FeatureExtractionApp(QMainWindow):
             )
         except Exception as error:
             QMessageBox.critical(self, "Gagal Menyimpan CSV", str(error))
+
+    def download_text_results(self):
+        """Simpan tabel hasil preprocessing + skor TF-IDF ke file CSV."""
+        if self.current_text_export_df is None or self.current_text_export_df.empty:
+            QMessageBox.warning(
+                self, "Peringatan",
+                "Belum ada hasil preprocessing & TF-IDF yang bisa diunduh. Jalankan proses terlebih dahulu!"
+            )
+            return
+
+        stem_name = Path(self.current_csv_path).stem if self.current_csv_path else "dataset"
+        default_filename = f"hasil_preprocessing_tfidf_{stem_name}.csv"
+
+        save_path, _ = QFileDialog.getSaveFileName(
+            self,
+            "Simpan Hasil Preprocessing & TF-IDF",
+            default_filename,
+            "CSV Files (*.csv)"
+        )
+        if not save_path:
+            return
+
+        if not save_path.lower().endswith(".csv"):
+            save_path += ".csv"
+
+        try:
+            self.current_text_export_df.to_csv(save_path, index=False, encoding="utf-8-sig")
+            self.lbl_text_status.setText(f"File tersimpan: {os.path.basename(save_path)}")
+            QMessageBox.information(
+                self,
+                "Download Berhasil",
+                f"Hasil preprocessing dan matriks TF-IDF berhasil disimpan ke:\n{save_path}"
+            )
+        except Exception as error:
+            QMessageBox.critical(
+                self,
+                "Gagal Menyimpan File",
+                f"Terjadi kesalahan saat menyimpan CSV:\n{error}"
+            )
 
     def on_select_local_wav(self, filename):
         if not filename:
@@ -521,6 +565,9 @@ class FeatureExtractionApp(QMainWindow):
                 language=language,
                 max_features=30
             )
+
+            self.current_text_export_df = result["export_dataframe"]
+            self.btn_download_text.setEnabled(True)
 
             selected = result["selected"]
             self.txt_raw[1].setText(selected["raw"])
