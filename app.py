@@ -3,6 +3,7 @@ import sys
 import shutil
 from pathlib import Path
 
+import matplotlib
 import pandas as pd
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
@@ -20,6 +21,18 @@ from modules.text_tfidf import analyze_text_csv
 from modules.audio_mfcc import analyze_audio_mfcc
 
 
+# Konfigurasi gaya grafik Matplotlib agar menyatu dengan latar hitam Alphamark
+matplotlib.rcParams.update({
+    "figure.facecolor": "#121212",
+    "axes.facecolor": "#0D0D0D",
+    "axes.edgecolor": "#2A2A2A",
+    "axes.labelcolor": "#F5F5F5",
+    "text.color": "#FFFFFF",
+    "xtick.color": "#A3A3A3",
+    "ytick.color": "#A3A3A3",
+})
+
+
 BASE_DIR = Path(__file__).resolve().parent
 TEXT_DATASET_DIR = BASE_DIR / "datasets" / "text"
 AUDIO_DATASET_DIR = BASE_DIR / "datasets" / "audio"
@@ -35,28 +48,28 @@ def resource_path(relative_path):
 
 
 def apply_glass_shadow(widget):
-    """Memberikan efek bayangan lembut pada kartu UI."""
+    """Memberikan efek elevasi halus pada kartu UI."""
     shadow = QGraphicsDropShadowEffect(widget)
-    shadow.setBlurRadius(28)
+    shadow.setBlurRadius(24)
     shadow.setXOffset(0)
-    shadow.setYOffset(8)
-    shadow.setColor(QColor(15, 23, 42, 22))
+    shadow.setYOffset(6)
+    shadow.setColor(QColor(0, 0, 0, 140))
     widget.setGraphicsEffect(shadow)
 
 
 class MplCanvas(FigureCanvas):
-    """Kanvas Matplotlib dengan warna dasar yang menyatu dengan panel."""
+    """Kanvas Matplotlib dengan warna dasar hitam matte yang menyatu dengan panel."""
     def __init__(self, width=6, height=3.2, dpi=100):
-        self.fig = Figure(figsize=(width, height), dpi=dpi, facecolor="#F6F9FE")
+        self.fig = Figure(figsize=(width, height), dpi=dpi, facecolor="#121212")
         self.axes = self.fig.add_subplot(111)
-        self.axes.set_facecolor("#FFFFFF")
+        self.axes.set_facecolor("#0D0D0D")
         super().__init__(self.fig)
 
 
 class FeatureExtractionApp(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("UTS Pengolahan Data Tidak Terstruktur • Glass Analyzer")
+        self.setWindowTitle("UTS Pengolahan Data Tidak Terstruktur ▪ Studio Analyzer")
         self.resize(1360, 840)
 
         TEXT_DATASET_DIR.mkdir(parents=True, exist_ok=True)
@@ -87,24 +100,24 @@ class FeatureExtractionApp(QMainWindow):
         self.setCentralWidget(central_widget)
 
         main_layout = QVBoxLayout(central_widget)
-        main_layout.setContentsMargins(22, 18, 22, 18)
-        main_layout.setSpacing(14)
+        main_layout.setContentsMargins(24, 20, 24, 20)
+        main_layout.setSpacing(16)
 
-        # Header glass
+        # Header Studio Editorial
         header_card = QFrame()
         header_card.setObjectName("HeaderCard")
         apply_glass_shadow(header_card)
         header_layout = QVBoxLayout(header_card)
-        header_layout.setContentsMargins(24, 16, 24, 16)
+        header_layout.setContentsMargins(24, 18, 24, 18)
         header_layout.setSpacing(6)
 
         badge_row = QHBoxLayout()
-        badge = QLabel("UTS Pengolahan Data Tidak Terstruktur • Glassmorphism UI")
+        badge = QLabel("PENGOLAHAN DATA TIDAK TERSTRUKTUR")
         badge.setObjectName("HeaderBadge")
         badge_row.addWidget(badge)
         badge_row.addStretch()
 
-        title = QLabel("Ekstraksi Fitur Data Teks (TF-IDF) & Data Audio (MFCC)")
+        title = QLabel("Ekstraksi Fitur Data Teks (TF-IDF) dan Data Audio (MFCC)")
         title.setObjectName("HeaderTitle")
         subtitle = QLabel(
             "Eksplorasi tahapan preprocessing (NLTK & NoiseReduce) serta ekstraksi fitur "
@@ -118,8 +131,8 @@ class FeatureExtractionApp(QMainWindow):
         main_layout.addWidget(header_card)
 
         self.tabs = QTabWidget()
-        self.tabs.addTab(self.build_text_tab(), "1. Analisis Data Teks (TF-IDF)")
-        self.tabs.addTab(self.build_audio_tab(), "2. Analisis Data Audio (MFCC)")
+        self.tabs.addTab(self.build_text_tab(), "01  ▪  Analisis Data Teks (TF-IDF)")
+        self.tabs.addTab(self.build_audio_tab(), "02  ▪  Analisis Data Audio (MFCC)")
         main_layout.addWidget(self.tabs)
 
     # TAB 1: DATA TEKS (TF-IDF)
@@ -137,7 +150,7 @@ class FeatureExtractionApp(QMainWindow):
         left_layout.setContentsMargins(20, 20, 20, 20)
         left_layout.setSpacing(10)
 
-        lbl_title = QLabel("Konfigurasi Dataset Teks")
+        lbl_title = QLabel("▪  Konfigurasi Dataset Teks")
         lbl_title.setObjectName("SectionTitle")
         lbl_desc = QLabel("Pilih file CSV dari folder datasets/text atau unggah file baru.")
         lbl_desc.setObjectName("SectionDesc")
@@ -164,7 +177,7 @@ class FeatureExtractionApp(QMainWindow):
         self.combo_language.addItem("Bahasa Inggris", "english")
         self.combo_language.addItem("Bahasa Indonesia", "indonesian")
 
-        btn_run_text = QPushButton("Jalankan Preprocessing & TF-IDF")
+        btn_run_text = QPushButton("Jalankan Preprocessing & TF-IDF  →")
         btn_run_text.setObjectName("PrimaryButton")
         btn_run_text.clicked.connect(self.run_text_preview)
 
@@ -197,7 +210,7 @@ class FeatureExtractionApp(QMainWindow):
         right_layout.setContentsMargins(22, 22, 22, 22)
         right_layout.setSpacing(10)
 
-        sec1 = QLabel("Hasil Tahapan Preprocessing Teks (NLTK)")
+        sec1 = QLabel("▪  Hasil Tahapan Preprocessing Teks (NLTK)")
         sec1.setObjectName("SectionTitle")
         right_layout.addWidget(sec1)
 
@@ -214,7 +227,7 @@ class FeatureExtractionApp(QMainWindow):
             right_layout.addWidget(label)
             right_layout.addWidget(box)
 
-        sec2 = QLabel("Hasil Ekstraksi Fitur (Matriks & Grafik TF-IDF)")
+        sec2 = QLabel("▪  Hasil Ekstraksi Fitur (Matriks & Grafik TF-IDF)")
         sec2.setObjectName("SectionTitle")
         right_layout.addSpacing(10)
         right_layout.addWidget(sec2)
@@ -250,7 +263,7 @@ class FeatureExtractionApp(QMainWindow):
         left_layout.setContentsMargins(20, 20, 20, 20)
         left_layout.setSpacing(10)
 
-        lbl_title = QLabel("Konfigurasi Dataset Audio")
+        lbl_title = QLabel("▪  Konfigurasi Dataset Audio")
         lbl_title.setObjectName("SectionTitle")
         lbl_desc = QLabel("Pilih file .wav/.mp3 dari folder datasets/audio atau unggah file baru.")
         lbl_desc.setObjectName("SectionDesc")
@@ -265,7 +278,7 @@ class FeatureExtractionApp(QMainWindow):
         btn_browse_wav.setObjectName("SecondaryButton")
         btn_browse_wav.clicked.connect(self.browse_wav_file)
 
-        btn_run_audio = QPushButton("Jalankan Preprocessing & MFCC")
+        btn_run_audio = QPushButton("Jalankan Preprocessing & MFCC  →")
         btn_run_audio.setObjectName("PrimaryButton")
         btn_run_audio.clicked.connect(self.run_audio_preview)
 
@@ -325,7 +338,7 @@ class FeatureExtractionApp(QMainWindow):
         right_layout.setSpacing(12)
 
         sec_mfcc = QLabel(
-            "Visualisasi Ekstraksi Fitur (MFCC Heatmap & Statistik 13 Koefisien)"
+            "▪  Visualisasi Ekstraksi Fitur (MFCC Heatmap & Statistik 13 Koefisien)"
         )
         sec_mfcc.setObjectName("SectionTitle")
         right_layout.addWidget(sec_mfcc)
@@ -367,6 +380,7 @@ class FeatureExtractionApp(QMainWindow):
         self.table_tfidf.setRowCount(0)
         self.table_tfidf.setColumnCount(0)
         self.canvas_tfidf.axes.clear()
+        self.canvas_tfidf.axes.set_facecolor("#0D0D0D")
         self.canvas_tfidf.draw()
 
     def refresh_local_files(self):
@@ -492,8 +506,6 @@ class FeatureExtractionApp(QMainWindow):
             QMessageBox.warning(self, "Peringatan", "Pilih file CSV terlebih dahulu!")
             return
 
-        # Bersihkan hasil dataset sebelumnya agar tidak tampil sebagai hasil
-        # dataset yang sedang diproses.
         self.clear_text_results()
 
         try:
@@ -525,11 +537,12 @@ class FeatureExtractionApp(QMainWindow):
             self.populate_table(self.table_tfidf, tfidf_display)
 
             self.canvas_tfidf.axes.clear()
+            self.canvas_tfidf.axes.set_facecolor("#0D0D0D")
             top_terms = result["top_terms"][:15]
             if top_terms:
                 terms = [item[0] for item in top_terms][::-1]
                 scores = [item[1] for item in top_terms][::-1]
-                self.canvas_tfidf.axes.barh(terms, scores, color="#2563EB")
+                self.canvas_tfidf.axes.barh(terms, scores, color="#EAFF00")
                 self.canvas_tfidf.axes.set_title(
                     f"Top TF-IDF Terms - Dokumen {result['selected_index'] + 1}"
                 )
@@ -537,7 +550,7 @@ class FeatureExtractionApp(QMainWindow):
             else:
                 self.canvas_tfidf.axes.text(
                     0.5, 0.5, "Tidak ada term yang dapat dihitung",
-                    ha="center", va="center"
+                    ha="center", va="center", color="#FFFFFF"
                 )
 
             self.canvas_tfidf.fig.tight_layout()

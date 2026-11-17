@@ -1,118 +1,115 @@
 /* =============================================================
-   Gaya Visual Desktop PyQt6: Modern Frosted Glassmorphism UI
+   Gaya Visual Desktop PyQt6: Alphamark™ Dark Studio Edition
+   Pitch Black (#0A0A0A) + Matte Charcoal (#121212) + Acid Yellow (#EAFF00)
    ============================================================= */
 
-/* Latar belakang utama gradasi lembut agar efek kaca transparan terlihat */
+/* Latar belakang utama Pitch Black */
 QMainWindow, QWidget#CentralWidget {
-    background: qlineargradient(
-        x1: 0, y1: 0, x2: 1, y2: 1,
-        stop: 0 #DBEAFE,
-        stop: 0.45 #EFF6FF,
-        stop: 0.8 #EDE9FE,
-        stop: 1 #E0F2FE
-    );
-    color: #0F172A;
-    font-family: "Segoe UI", "Inter", sans-serif;
+    background-color: #0A0A0A;
+    color: #F5F5F5;
+    font-family: "Helvetica Neue", "Inter", "Segoe UI", sans-serif;
     font-size: 13px;
 }
 
-/* Header Kaca Melayang */
+/* Header Kartu Hitam Matte dengan Garis Tepi Tipis */
 QFrame#HeaderCard {
-    background-color: rgba(255, 255, 255, 0.68);
-    border: 1.5px solid rgba(255, 255, 255, 0.95);
-    border-radius: 18px;
+    background-color: #121212;
+    border: 1px solid #242424;
+    border-radius: 12px;
 }
 
 QLabel#HeaderBadge {
-    background-color: rgba(37, 99, 235, 0.12);
-    color: #1D4ED8;
-    border: 1px solid rgba(37, 99, 235, 0.28);
-    border-radius: 11px;
+    background-color: rgba(234, 255, 0, 0.12);
+    color: #EAFF00;
+    border: 1px solid rgba(234, 255, 0, 0.35);
+    border-radius: 10px;
     padding: 4px 12px;
     font-size: 11px;
     font-weight: bold;
+    letter-spacing: 0.5px;
 }
 
 QLabel#HeaderTitle {
-    color: #0F172A;
-    font-size: 20px;
+    color: #FFFFFF;
+    font-size: 21px;
     font-weight: bold;
 }
 
 QLabel#HeaderSubtitle {
-    color: #475569;
+    color: #8E8E8E;
     font-size: 13px;
 }
 
-/* Kartu Panel Kaca Buram (Frosted Glass Card) */
+/* Kartu Panel Konten */
 QFrame#PanelCard {
-    background-color: rgba(255, 255, 255, 0.66);
-    border: 1.5px solid rgba(255, 255, 255, 0.92);
-    border-radius: 18px;
+    background-color: #121212;
+    border: 1px solid #242424;
+    border-radius: 12px;
 }
 
 QLabel#SectionTitle {
-    color: #0F172A;
-    font-size: 15px;
+    color: #FFFFFF;
+    font-size: 14px;
     font-weight: bold;
-    padding-bottom: 4px;
-    border-bottom: 1px solid rgba(148, 163, 184, 0.35);
+    padding-bottom: 6px;
+    border-bottom: 1px solid #222222;
 }
 
 QLabel#SectionDesc {
-    color: #475569;
+    color: #8E8E8E;
     font-size: 12px;
 }
 
 QLabel#FieldLabel {
-    color: #1E293B;
+    color: #D4D4D4;
     font-weight: 600;
     font-size: 12px;
     margin-top: 4px;
 }
 
-/* Tab Navigasi Gaya Kapsul Kaca (Pill Glass Tabs) */
+/* Tab Navigasi Kapsul Gelap & Neon Yellow */
 QTabWidget::pane {
     border: none;
     background: transparent;
 }
 
 QTabBar::tab {
-    background-color: rgba(255, 255, 255, 0.42);
-    color: #475569;
+    background-color: #141414;
+    color: #8E8E8E;
     padding: 9px 22px;
     margin-right: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.70);
-    border-radius: 12px;
+    border: 1px solid #262626;
+    border-radius: 17px;
     font-weight: 600;
 }
 
 QTabBar::tab:selected {
-    background-color: rgba(255, 255, 255, 0.88);
-    color: #2563EB;
-    border: 1.5px solid #FFFFFF;
+    background-color: #EAFF00;
+    color: #0A0A0A;
+    border: 1px solid #EAFF00;
     font-weight: bold;
 }
 
 QTabBar::tab:hover:!selected {
-    background-color: rgba(255, 255, 255, 0.65);
-    color: #0F172A;
+    background-color: #1E1E1E;
+    color: #FFFFFF;
+    border: 1px solid #383838;
 }
 
-/* Kotak Input, Dropdown, SpinBox Transparan */
+/* Kotak Input, Dropdown, SpinBox */
 QComboBox, QSpinBox, QTextEdit {
-    background-color: rgba(255, 255, 255, 0.58);
-    color: #0F172A;
-    border: 1px solid rgba(255, 255, 255, 0.90);
-    border-radius: 10px;
+    background-color: #0D0D0D;
+    color: #F5F5F5;
+    border: 1px solid #2A2A2A;
+    border-radius: 8px;
     padding: 7px 10px;
-    selection-background-color: #2563EB;
-    selection-color: #FFFFFF;
+    selection-background-color: #EAFF00;
+    selection-color: #0A0A0A;
 }
 
 QComboBox:focus, QSpinBox:focus, QTextEdit:focus {
-    background-color: rgba(255, 255, 255, 0.90);
-    border: 1.5px solid #3B82F6;
+    background-color: #141414;
+    border: 1px solid #EAFF00;
 }
 
 QComboBox::drop-down {
@@ -121,90 +118,89 @@ QComboBox::drop-down {
 }
 
 QComboBox QAbstractItemView {
-    background-color: #FFFFFF;
-    color: #0F172A;
-    border: 1px solid #CBD5E1;
+    background-color: #161616;
+    color: #F5F5F5;
+    border: 1px solid #2E2E2E;
     border-radius: 8px;
-    selection-background-color: #EFF6FF;
-    selection-color: #1D4ED8;
+    selection-background-color: #EAFF00;
+    selection-color: #0A0A0A;
 }
 
-/* Tombol Utama (Gradient Glass Blue-Indigo) */
+/* Tombol Utama (Neon Acid-Yellow Pill CTA khas Alphamark) */
 QPushButton#PrimaryButton {
-    background: qlineargradient(
-        x1: 0, y1: 0, x2: 1, y2: 0,
-        stop: 0 rgba(37, 99, 235, 0.92),
-        stop: 1 rgba(79, 70, 229, 0.92)
-    );
-    color: #FFFFFF;
-    border: 1px solid rgba(255, 255, 255, 0.45);
-    border-radius: 12px;
-    padding: 11px 16px;
+    background-color: #EAFF00;
+    color: #0A0A0A;
+    border: 1px solid #EAFF00;
+    border-radius: 19px;
+    padding: 11px 18px;
     font-weight: bold;
     font-size: 13px;
 }
 
 QPushButton#PrimaryButton:hover {
-    background: qlineargradient(
-        x1: 0, y1: 0, x2: 1, y2: 0,
-        stop: 0 rgba(29, 78, 216, 0.98),
-        stop: 1 rgba(67, 56, 202, 0.98)
-    );
+    background-color: #F4FF66;
+    border: 1px solid #F4FF66;
 }
 
 QPushButton#PrimaryButton:pressed {
-    background-color: #1E40AF;
+    background-color: #CFE000;
 }
 
-/* Tombol Sekunder (Frosted Glass Button) */
+/* Tombol Sekunder (Dark Studio Pill Button) */
 QPushButton#SecondaryButton {
-    background-color: rgba(255, 255, 255, 0.65);
-    color: #1E293B;
-    border: 1px solid rgba(255, 255, 255, 0.95);
-    border-radius: 10px;
+    background-color: #181818;
+    color: #F5F5F5;
+    border: 1px solid #2E2E2E;
+    border-radius: 17px;
     padding: 8px 14px;
     font-weight: 600;
 }
 
 QPushButton#SecondaryButton:hover {
-    background-color: rgba(255, 255, 255, 0.92);
-    color: #2563EB;
+    background-color: #222222;
+    border: 1px solid #EAFF00;
+    color: #EAFF00;
 }
 
 QPushButton#SecondaryButton:pressed {
-    background-color: rgba(226, 232, 240, 0.85);
+    background-color: #0F0F0F;
 }
 
 QPushButton#SecondaryButton:disabled {
-    background-color: rgba(241, 245, 249, 0.35);
-    color: #94A3B8;
-    border: 1px solid rgba(203, 213, 225, 0.5);
+    background-color: #111111;
+    color: #4A4A4A;
+    border: 1px solid #1E1E1E;
 }
 
-/* Tabel Data Kaca */
+/* Tabel Data Grid Gelap */
 QTableWidget {
-    background-color: rgba(255, 255, 255, 0.62);
-    color: #0F172A;
-    gridline-color: rgba(203, 213, 225, 0.65);
-    border: 1px solid rgba(255, 255, 255, 0.92);
-    border-radius: 12px;
+    background-color: #0D0D0D;
+    color: #EAEAEA;
+    gridline-color: #222222;
+    border: 1px solid #242424;
+    border-radius: 8px;
+}
+
+QTableWidget::item:selected {
+    background-color: #EAFF00;
+    color: #0A0A0A;
 }
 
 QHeaderView::section {
-    background-color: rgba(241, 245, 249, 0.85);
-    color: #1E293B;
+    background-color: #161616;
+    color: #EAFF00;
     font-weight: bold;
     padding: 7px;
     border: none;
-    border-bottom: 1px solid rgba(203, 213, 225, 0.8);
+    border-bottom: 1px solid #2A2A2A;
 }
 
 QTableWidget QTableCornerButton::section {
-    background-color: rgba(241, 245, 249, 0.85);
+    background-color: #161616;
     border: none;
 }
 
-/* ScrollArea & Scrollbar Minimalis Transparan */
+/* ScrollArea & Scrollbar Gelap */
 QScrollArea,
 QScrollArea > QWidget > QWidget,
 QAbstractScrollArea::corner {
@@ -213,23 +209,41 @@ QAbstractScrollArea::corner {
 }
 
 QScrollBar:vertical {
-    background: rgba(255, 255, 255, 0.25);
-    width: 8px;
-    margin: 4px 2px 4px 2px;
-    border-radius: 4px;
+    background: #0D0D0D;
+    width: 7px;
+    margin: 4px 1px 4px 1px;
+    border-radius: 3px;
 }
 
 QScrollBar::handle:vertical {
-    background: rgba(100, 116, 139, 0.45);
+    background: #2E2E2E;
     min-height: 28px;
-    border-radius: 4px;
+    border-radius: 3px;
 }
 
 QScrollBar::handle:vertical:hover {
-    background: rgba(37, 99, 235, 0.65);
+    background: #EAFF00;
 }
 
 QScrollBar::add-line:vertical,
 QScrollBar::sub-line:vertical {
     height: 0px;
+}
+
+/* Dialog Peringatan / Error Tema Gelap */
+QMessageBox {
+    background-color: #141414;
+    color: #F5F5F5;
+}
+
+QMessageBox QLabel {
+    color: #F5F5F5;
+}
+
+QMessageBox QPushButton {
+    background-color: #EAFF00;
+    color: #0A0A0A;
+    border-radius: 12px;
+    padding: 6px 16px;
+    font-weight: bold;
 }
