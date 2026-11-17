@@ -105,7 +105,7 @@ tfidf-mfcc-analyzer/
 Nama    : I Putu Angga Widhyadana Putra (240030309)
 Username: KillyNourin
 
-Nama    : I Gede Wiryaartha Adi Karsa (240030239)
+Nama    : I Gede Wiryartha Adi Karsa (240030239)
 Username: DragonEmperor5
 
 Nama    : Putu Dharma Putra (240030310)
