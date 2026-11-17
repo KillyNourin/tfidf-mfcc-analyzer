@@ -123,10 +123,10 @@ Username: Rinshiryu
   <img src="https://github.com/DragonEmperor5.png" width="60" style="border-radius: 50%;" alt="De Adi">
 </a>
 
-<a href="https://github.com/KomangRestuTriWardana">
+<a href="https://github.com/OrisKunzz">
   <img src="https://github.com/OrisKunzz.png" width="60" style="border-radius: 50%;" alt="Restu">
 </a>
 
-<a href="https://github.com/KomangRestuTriWardana">
+<a href="https://github.com/Rinshiryu">
   <img src="https://github.com/Rinshiryu.png" width="60" style="border-radius: 50%;" alt="Restu">
 </a>
