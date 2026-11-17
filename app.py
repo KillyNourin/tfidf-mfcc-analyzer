@@ -69,7 +69,7 @@ class MplCanvas(FigureCanvas):
 class FeatureExtractionApp(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("UTS Pengolahan Data Tidak Terstruktur ▪ Studio Analyzer")
+        self.setWindowTitle("Scrapping Val Audio")
         self.resize(1360, 840)
 
         TEXT_DATASET_DIR.mkdir(parents=True, exist_ok=True)
