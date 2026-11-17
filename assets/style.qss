@@ -1,7 +1,4 @@
-/* =============================================================
-   Gaya Visual Desktop PyQt6: Alphamark™ Dark Studio Edition
-   Pitch Black (#0A0A0A) + Matte Charcoal (#121212) + Acid Yellow (#EAFF00)
-   ============================================================= */
+/* Pitch Black (#0A0A0A) + Matte Charcoal (#121212) + Acid Yellow (#EAFF00)*/
 
 /* Latar belakang utama Pitch Black */
 QMainWindow, QWidget#CentralWidget {
