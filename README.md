@@ -113,6 +113,9 @@ Username: OrisKunzz
 
 Nama    : I Putu Kenny Juaguns Naru (240030320)
 Username: Rinshiryu
+
+Nama    : I Kadek Gede Riyan Manik Utama Putra (240030282)
+Username: kadekg783-commits
 ```
 
 <a href="https://github.com/KillyNourin">
@@ -129,4 +132,8 @@ Username: Rinshiryu
 
 <a href="https://github.com/Rinshiryu">
   <img src="https://github.com/Rinshiryu.png" width="60" style="border-radius: 50%;" alt="Restu">
+</a>
+
+<a href="https://github.com/kadekg783-commits">
+  <img src="https://github.com/kadekg783-commits.png" width="60" style="border-radius: 50%;" alt="Restu">
 </a>
