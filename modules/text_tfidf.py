@@ -5,12 +5,13 @@ Mendukung teks Bahasa Indonesia dan Bahasa Inggris.
 Fungsi utama:
     analyze_text_csv(csv_path, document_index=0, language="english", max_features=30)
 
-Hasilnya dipakai oleh antarmuka PyQt6 pada main.py.
+Hasilnya dipakai oleh antarmuka PyQt6 pada app.py.
 """
 
 import re
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer, ENGLISH_STOP_WORDS
 
@@ -21,9 +22,9 @@ INDONESIAN_STOPWORDS = {
     "saya", "aku", "kami", "kita", "anda", "kamu", "dia", "mereka",
     "sebagai", "agar", "dapat", "bisa", "akan", "sudah", "telah", "belum",
     "lebih", "sangat", "sekali", "hanya", "oleh", "sebuah", "suatu",
-    "ada", "jadi", "nya", "pun", " saat", "serta", "tetapi", "namun",
-    "kalau", "jika", "maka", "ketika", "saat", "hingga", "sampai",
-    " antara", "setiap", "beberapa", "para", "banyak", "masih", "lagi",
+    "ada", "jadi", "nya", "pun", "saat", "serta", "tetapi", "namun",
+    "kalau", "jika", "maka", "ketika", "hingga", "sampai",
+    "antara", "setiap", "beberapa", "para", "banyak", "masih", "lagi",
     "the", "and", "is", "are", "was", "were", "a", "an", "of", "to",
     "in", "on", "for", "with", "this", "that", "it", "as", "at", "by",
 }
@@ -71,10 +72,7 @@ def preprocess_text(text, language="english"):
     raw = "" if pd.isna(text) else str(text)
     case_folding = raw.lower()
 
-    # Cleaning dilakukan terhadap teks yang sudah diubah menjadi huruf kecil.
     cleaned = _clean_text(case_folding)
-
-    # Tokenizing menggunakan pemisahan berdasarkan spasi setelah cleaning.
     tokens = cleaned.split()
 
     language = language.lower()
@@ -94,7 +92,6 @@ def preprocess_text(text, language="english"):
         final_tokens = [_lemmatize_english(word) for word in filtered]
         method_name = "Lemmatization (NLTK WordNet; fallback jika corpus belum tersedia)"
 
-    # Hilangkan token kosong dan duplikasi tidak dilakukan karena frekuensi kata penting.
     final_tokens = [word for word in final_tokens if word]
     return {
         "raw": raw,
@@ -114,18 +111,18 @@ def _choose_text_column(dataframe):
         raise ValueError("Dataset CSV tidak memiliki baris data.")
 
     candidates = []
-    preferred_words = ("text", "teks", "review", "ulasan", "komentar",
-                       "comment", "content", "sentence", "kalimat", "tweet",
-                       "description", "deskripsi", "judul", "berita", "name",
-                       "nama", "team", "player", "tournament")
+    preferred_words = (
+        "text", "teks", "review", "ulasan", "komentar",
+        "comment", "content", "sentence", "kalimat", "tweet",
+        "description", "deskripsi", "judul", "berita", "name",
+        "nama", "team", "player", "tournament"
+    )
     id_words = {"id", "idx", "index", "kode", "code", "nomor", "number", "key"}
     for column in dataframe.columns:
         series = dataframe[column].dropna().astype(str)
         if series.empty:
             continue
 
-        # Hitung panjang isi berdasarkan huruf saja. Kolom ID/angka akan
-        # menghasilkan skor hampir nol sehingga tidak dipilih sebagai teks.
         letter_lengths = series.str.count(r"[A-Za-zÀ-ÿ]")
         if letter_lengths.mean() < 1:
             continue
@@ -134,7 +131,6 @@ def _choose_text_column(dataframe):
         name_tokens = set(re.split(r"[^a-z0-9]+", name))
         name_bonus = 1000 if any(word.strip() in name for word in preferred_words) else 0
         id_penalty = -1000 if name_tokens & id_words else 0
-        # Kolom teks biasanya memiliki isi lebih panjang daripada ID/kategori.
         score = name_bonus + id_penalty + min(letter_lengths.mean(), 500)
         candidates.append((score, column))
 
@@ -168,7 +164,6 @@ def analyze_text_csv(csv_path, document_index=0, language="english", max_feature
     processed_rows = [preprocess_text(document, language) for document in documents]
     processed_documents = [row["processed"] for row in processed_rows]
 
-    # Dokumen yang kosong setelah preprocessing tidak dapat dipakai oleh TF-IDF.
     valid_indices = [i for i, doc in enumerate(processed_documents) if doc.strip()]
     if not valid_indices:
         raise ValueError(
@@ -183,7 +178,7 @@ def analyze_text_csv(csv_path, document_index=0, language="english", max_feature
     feature_names = vectorizer.get_feature_names_out()
     dense_matrix = matrix.toarray()
 
-    # Matriks TF-IDF: baris = dokumen, kolom = term.
+    # Matriks TF-IDF untuk tampilan tabel UI
     tfidf_dataframe = pd.DataFrame(
         dense_matrix,
         columns=feature_names,
@@ -191,10 +186,28 @@ def analyze_text_csv(csv_path, document_index=0, language="english", max_feature
     )
     tfidf_dataframe.index.name = "Dokumen"
 
+    # Gabungkan seluruh tahapan preprocessing + skor TF-IDF untuk fitur Download CSV
+    full_tfidf = np.zeros((len(documents), len(feature_names)), dtype=float)
+    full_tfidf[valid_indices] = np.round(dense_matrix, 6)
+
+    prep_df = pd.DataFrame({
+        "Dokumen": [f"Dokumen {i + 1}" for i in range(len(documents))],
+        "Raw_Text": [row["raw"] for row in processed_rows],
+        "Case_Folding": [row["case_folding"] for row in processed_rows],
+        "Cleaning": [row["cleaning"] for row in processed_rows],
+        "Tokenizing": [", ".join(row["tokens"]) for row in processed_rows],
+        "Stopword_Removal": [", ".join(row["without_stopwords"]) for row in processed_rows],
+        "Hasil_Preprocessing": [row["processed"] for row in processed_rows],
+    })
+    tfidf_export_cols = pd.DataFrame(
+        full_tfidf,
+        columns=[f"TFIDF_{name}" for name in feature_names]
+    )
+    export_dataframe = pd.concat([prep_df, tfidf_export_cols], axis=1)
+
     selected_index = max(0, min(int(document_index), len(documents) - 1))
     selected = processed_rows[selected_index]
 
-    # Urutkan skor TF-IDF untuk dokumen yang sedang diperiksa.
     if selected_index in valid_indices:
         row_position = valid_indices.index(selected_index)
         scores = dense_matrix[row_position]
@@ -207,7 +220,6 @@ def analyze_text_csv(csv_path, document_index=0, language="english", max_feature
     else:
         top_terms = []
 
-    # Rata-rata skor setiap term pada seluruh dokumen.
     mean_scores = dense_matrix.mean(axis=0)
     overall_order = mean_scores.argsort()[::-1]
     overall_terms = [
@@ -223,6 +235,7 @@ def analyze_text_csv(csv_path, document_index=0, language="english", max_feature
         "selected": selected,
         "processed_documents": processed_documents,
         "tfidf_matrix": tfidf_dataframe,
+        "export_dataframe": export_dataframe,
         "top_terms": top_terms,
         "overall_terms": overall_terms,
         "feature_count": len(feature_names),
