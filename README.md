@@ -99,3 +99,34 @@ tfidf-mfcc-analyzer/
    ```bash
    python app.py
    ```
+
+## Contributor
+```text
+Nama    : I Putu Angga Widhyadana Putra (240030309)
+Username: KillyNourin
+
+Nama    : I Gede Wiryaartha Adi Karsa (240030239)
+Username: DragonEmperor5
+
+Nama    : Putu Dharma Putra (240030310)
+Username: OrisKunzz
+
+Nama    : I Putu Kenny Juaguns Naru (240030320)
+Username: Rinshiryu
+```
+
+<a href="https://github.com/KillyNourin">
+  <img src="https://github.com/KillyNourin.png" width="60" style="border-radius: 50%;" alt="Angga">
+</a>
+
+<a href="https://github.com/DragonEmperor5">
+  <img src="https://github.com/DragonEmperor5.png" width="60" style="border-radius: 50%;" alt="De Adi">
+</a>
+
+<a href="https://github.com/KomangRestuTriWardana">
+  <img src="https://github.com/OrisKunzz.png" width="60" style="border-radius: 50%;" alt="Restu">
+</a>
+
+<a href="https://github.com/KomangRestuTriWardana">
+  <img src="https://github.com/Rinshiryu.png" width="60" style="border-radius: 50%;" alt="Restu">
+</a>
