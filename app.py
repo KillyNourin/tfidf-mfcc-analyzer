@@ -33,13 +33,17 @@ matplotlib.rcParams.update({
 })
 
 
+# Definisi direktori utama proyek serta folder penyimpanan dataset lokal
 BASE_DIR = Path(__file__).resolve().parent
 TEXT_DATASET_DIR = BASE_DIR / "datasets" / "text"
 AUDIO_DATASET_DIR = BASE_DIR / "datasets" / "audio"
 
 
 def resource_path(relative_path):
-    """Mendapatkan path absolut untuk mode script maupun PyInstaller."""
+    """
+    Fungsi untuk mendapatkan path absolut aset/file pendukung.
+    Mendukung mode eksekusi Python biasa maupun setelah dibungkus menjadi .exe via PyInstaller.
+    """
     try:
         base_path = Path(sys._MEIPASS)
     except AttributeError:
@@ -48,7 +52,10 @@ def resource_path(relative_path):
 
 
 def apply_glass_shadow(widget):
-    """Memberikan efek elevasi halus pada kartu UI."""
+    """
+    Fungsi untuk memberikan efek bayangan (drop shadow) halus pada komponen kartu UI
+    agar terlihat memiliki kedalaman/elevasi di atas latar belakang.
+    """
     shadow = QGraphicsDropShadowEffect(widget)
     shadow.setBlurRadius(24)
     shadow.setXOffset(0)
@@ -58,7 +65,10 @@ def apply_glass_shadow(widget):
 
 
 class MplCanvas(FigureCanvas):
-    """Kanvas Matplotlib dengan warna dasar hitam matte yang menyatu dengan panel."""
+    """
+    Kelas pembungkus (wrapper) FigureCanvas Matplotlib agar grafik batang TF-IDF
+    dan heatmap MFCC dapat ditampilkan langsung di dalam antarmuka PyQt6.
+    """
     def __init__(self, width=6, height=3.2, dpi=100):
         self.fig = Figure(figsize=(width, height), dpi=dpi, facecolor="#121212")
         self.axes = self.fig.add_subplot(111)
@@ -67,7 +77,19 @@ class MplCanvas(FigureCanvas):
 
 
 class FeatureExtractionApp(QMainWindow):
+    """
+    Kelas jendela utama (Main Window) aplikasi desktop ekstraksi fitur
+    Data Teks (TF-IDF) dan Data Audio (MFCC).
+    """
+
     def __init__(self):
+        """
+        Fungsi inisialisasi (constructor) jendela utama:
+        - Mengatur judul dan ukuran jendela
+        - Membuat folder dataset jika belum ada
+        - Menyiapkan variabel state dan komponen pemutar audio
+        - Memuat UI, stylesheet QSS, dan daftar file dataset lokal
+        """
         super().__init__()
         self.setWindowTitle("Scrapping Val Audio")
         self.resize(1360, 840)
@@ -90,12 +112,20 @@ class FeatureExtractionApp(QMainWindow):
         self.refresh_local_files()
 
     def load_stylesheet(self):
+        """
+        Fungsi untuk membaca file desain tampilan (assets/style.qss)
+        dan menerapkannya ke seluruh elemen antarmuka aplikasi.
+        """
         qss_path = Path(resource_path(Path("assets") / "style.qss"))
         if qss_path.exists():
             with qss_path.open("r", encoding="utf-8") as file:
                 self.setStyleSheet(file.read())
 
     def init_ui(self):
+        """
+        Fungsi untuk membangun kerangka utama antarmuka pengguna (UI),
+        meliputi kartu header judul aplikasi dan dua tab navigasi utama (Teks & Audio).
+        """
         central_widget = QWidget()
         central_widget.setObjectName("CentralWidget")
         self.setCentralWidget(central_widget)
@@ -132,6 +162,11 @@ class FeatureExtractionApp(QMainWindow):
 
     # TAB 1: DATA TEKS (TF-IDF)
     def build_text_tab(self):
+        """
+        Fungsi untuk menyusun tata letak dan widget pada Tab 01 (Analisis Data Teks):
+        - Panel kiri: Pemilihan CSV, indeks dokumen, bahasa, tombol proses, & tombol download
+        - Panel kanan: Kotak tahapan preprocessing NLTK, tabel matriks TF-IDF, & grafik batang
+        """
         tab = QWidget()
         layout = QHBoxLayout(tab)
         layout.setContentsMargins(0, 10, 0, 0)
@@ -251,6 +286,11 @@ class FeatureExtractionApp(QMainWindow):
 
     # TAB 2: DATA AUDIO (MFCC)
     def build_audio_tab(self):
+        """
+        Fungsi untuk menyusun tata letak dan widget pada Tab 02 (Analisis Data Audio):
+        - Panel kiri: Pemilihan file audio, tombol proses MFCC, & tombol pemutar Before/After
+        - Panel kanan: Kanvas visualisasi Heatmap MFCC & tabel statistik 13 koefisien
+        """
         tab = QWidget()
         layout = QHBoxLayout(tab)
         layout.setContentsMargins(0, 10, 0, 0)
@@ -362,6 +402,10 @@ class FeatureExtractionApp(QMainWindow):
 
     # EVENT HANDLER & PEMBANTU UI
     def create_readonly_box(self, label_text, max_height):
+        """
+        Fungsi pembantu untuk membuat pasangan label dan kotak teks read-only
+        yang menampilkan hasil tiap langkah preprocessing teks.
+        """
         label = QLabel(label_text)
         label.setObjectName("FieldLabel")
         box = QTextEdit()
@@ -370,7 +414,10 @@ class FeatureExtractionApp(QMainWindow):
         return label, box
 
     def clear_text_results(self):
-        """Bersihkan hasil lama agar tidak tertukar dengan dataset yang baru dipilih."""
+        """
+        Fungsi untuk mengosongkan seluruh kotak output teks, tabel TF-IDF,
+        dan kanvas grafik sebelum memproses atau mengganti dataset baru.
+        """
         for label, box in [
             self.txt_raw, self.txt_case, self.txt_clean,
             self.txt_token, self.txt_lemma
@@ -389,6 +436,10 @@ class FeatureExtractionApp(QMainWindow):
         self.canvas_tfidf.draw()
 
     def refresh_local_files(self):
+        """
+        Fungsi untuk memindai ulang folder datasets/text/ dan datasets/audio/
+        lalu mengisi daftar pilihan pada dropdown (QComboBox).
+        """
         csv_files = sorted(
             f.name for f in TEXT_DATASET_DIR.iterdir()
             if f.is_file() and f.suffix.lower() == ".csv"
@@ -404,6 +455,10 @@ class FeatureExtractionApp(QMainWindow):
         self.combo_wav.addItems(wav_files)
 
     def on_select_local_csv(self, filename):
+        """
+        Event handler saat pengguna memilih file CSV dari dropdown lokal.
+        Memperbarui path file aktif dan membersihkan hasil tampilan sebelumnya.
+        """
         if not filename:
             self.current_csv_path = None
             return
@@ -413,6 +468,10 @@ class FeatureExtractionApp(QMainWindow):
         self.lbl_text_status.setText(f"Dataset terpilih: {filename}")
 
     def browse_csv_file(self):
+        """
+        Fungsi untuk membuka dialog pemilihan file CSV dari komputer pengguna,
+        menyalinnya ke folder datasets/text/, lalu langsung memilihnya di aplikasi.
+        """
         path, _ = QFileDialog.getOpenFileName(
             self, "Pilih Dataset CSV", "", "CSV Files (*.csv)"
         )
@@ -436,7 +495,10 @@ class FeatureExtractionApp(QMainWindow):
             QMessageBox.critical(self, "Gagal Menyimpan CSV", str(error))
 
     def download_text_results(self):
-        """Simpan tabel hasil preprocessing + skor TF-IDF ke file CSV."""
+        """
+        Fungsi untuk mengekspor dan menyimpan tabel gabungan hasil tahapan
+        preprocessing teks beserta skor bobot TF-IDF ke dalam file CSV baru.
+        """
         if self.current_text_export_df is None or self.current_text_export_df.empty:
             QMessageBox.warning(
                 self, "Peringatan",
@@ -475,6 +537,10 @@ class FeatureExtractionApp(QMainWindow):
             )
 
     def on_select_local_wav(self, filename):
+        """
+        Event handler saat pengguna memilih file audio (.wav/.mp3) dari dropdown lokal.
+        Menghentikan pemutaran audio yang berjalan dan menyiapkan path audio Before.
+        """
         if not filename:
             self.current_audio_path = None
             return
@@ -488,6 +554,10 @@ class FeatureExtractionApp(QMainWindow):
             self.btn_play_after.setEnabled(False)
 
     def browse_wav_file(self):
+        """
+        Fungsi untuk membuka dialog pemilihan file audio (.wav/.mp3) dari komputer,
+        menyalinnya ke folder datasets/audio/, dan mengaktifkannya sebagai input.
+        """
         path, _ = QFileDialog.getOpenFileName(
             self, "Pilih Dataset Audio", "", "Audio Files (*.wav *.mp3)"
         )
@@ -515,6 +585,10 @@ class FeatureExtractionApp(QMainWindow):
             QMessageBox.critical(self, "Gagal Menyimpan Audio", str(error))
 
     def play_audio_file(self, file_path, label_mode):
+        """
+        Fungsi untuk memutar file audio (baik versi Before/Asli maupun After/Clean)
+        menggunakan QMediaPlayer dan memperbarui teks status pemutaran.
+        """
         if not file_path or not os.path.exists(file_path):
             QMessageBox.warning(
                 self, "Peringatan",
@@ -530,10 +604,17 @@ class FeatureExtractionApp(QMainWindow):
         )
 
     def stop_audio(self):
+        """
+        Fungsi untuk menghentikan audio yang sedang diputar dan melepas sumber file.
+        """
         self.player.stop()
         self.player.setSource(QUrl())
 
     def populate_table(self, table_widget, dataframe):
+        """
+        Fungsi pembantu untuk mengisi data dari Pandas DataFrame ke dalam
+        komponen QTableWidget (tabel TF-IDF maupun tabel statistik MFCC).
+        """
         table_widget.setRowCount(len(dataframe))
         table_widget.setColumnCount(len(dataframe.columns))
         table_widget.setHorizontalHeaderLabels(dataframe.columns.tolist())
@@ -545,7 +626,13 @@ class FeatureExtractionApp(QMainWindow):
                 )
 
     def run_text_preview(self):
-        """Proses dataset CSV yang sedang dipilih, tanpa menimpa hasil dengan data dummy."""
+        """
+        Fungsi utama eksekusi analisis data teks:
+        - Memanggil modul analyze_text_csv() untuk preprocessing & perhitungan TF-IDF
+        - Menampilkan hasil setiap tahap (Raw -> Lemmatization) ke kotak teks
+        - Mengisi tabel matriks TF-IDF dan menggambar grafik batang Top Terms
+        - Mengaktifkan tombol download hasil CSV
+        """
         if not self.current_csv_path or not os.path.isfile(self.current_csv_path):
             QMessageBox.warning(self, "Peringatan", "Pilih file CSV terlebih dahulu!")
             return
@@ -619,6 +706,12 @@ class FeatureExtractionApp(QMainWindow):
             self.lbl_text_status.setText("Status: Pemrosesan gagal.")
 
     def run_audio_preview(self):
+        """
+        Fungsi utama eksekusi analisis data audio:
+        - Memanggil modul analyze_audio_mfcc() untuk reduksi noise & ekstraksi 13 koefisien MFCC
+        - Menyimpan path audio Before & After agar tombol pemutar aktif
+        - Merender visualisasi Heatmap MFCC dan mengisi tabel statistik (Mean, Std Dev, Min, Max)
+        """
         if not self.current_audio_path or not os.path.isfile(self.current_audio_path):
             QMessageBox.warning(self, "Peringatan", "Tidak ada file audio yang dipilih!")
             return
@@ -655,6 +748,7 @@ class FeatureExtractionApp(QMainWindow):
             self.lbl_audio_status.setText("Status: Gagal memproses audio.")
 
 
+# Titik masuk utama (entry point) saat file app.py dijalankan
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = FeatureExtractionApp()
